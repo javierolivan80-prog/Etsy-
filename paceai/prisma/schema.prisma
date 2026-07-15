@@ -1,0 +1,155 @@
+// PaceAI database schema (PostgreSQL + Prisma).
+//
+// The app runs in demo mode until DATABASE_URL is configured; once it is,
+// run `npx prisma migrate dev` and switch src/lib/data.ts to these models.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Auth.js (NextAuth v5) ----------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  accounts      Account[]
+  sessions      Session[]
+
+  // Athlete profile
+  maxHr    Int @default(190)
+  restHr   Int @default(55)
+  weightKg Float?
+
+  activities   Activity[]
+  goals        Goal[]
+  chatMessages ChatMessage[]
+  connections  Connection[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @id
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ---------- Training data ----------
+
+/// External platform links (Strava, Garmin, Apple Health, Coros, Polar, Suunto).
+model Connection {
+  id           String    @id @default(cuid())
+  userId       String
+  provider     String // "strava" | "garmin" | "apple-health" | "coros" | "polar" | "suunto"
+  accessToken  String?
+  refreshToken String?
+  expiresAt    DateTime?
+  externalId   String?
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+}
+
+model Activity {
+  id             String   @id @default(cuid())
+  userId         String
+  date           DateTime
+  name           String
+  sport          String   @default("running")
+  type           String // easy | long | tempo | intervals | recovery | race
+  distanceKm     Float
+  durationSec    Int
+  avgPaceSecKm   Float
+  avgHr          Int?
+  maxHr          Int?
+  elevationGainM Int?
+  cadenceSpm     Int?
+  strideLenM     Float?
+  powerW         Int?
+  calories       Int?
+  source         String   @default("manual")
+  externalId     String? // dedupe key for synced activities
+  splits         Split[]
+  report         Report?
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, source, externalId])
+  @@index([userId, date])
+}
+
+model Split {
+  id             String   @id @default(cuid())
+  activityId     String
+  km             Int
+  distanceKm     Float
+  seconds        Int
+  avgHr          Int?
+  elevationGainM Int?
+  activity       Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@index([activityId])
+}
+
+/// Cached AI analysis for an activity (regenerated when the model/provider changes).
+model Report {
+  id         String   @id @default(cuid())
+  activityId String   @unique
+  headline   String
+  body       String // full narrative (markdown)
+  provider   String // "engine" | "anthropic" | "openai" | "gemini"
+  createdAt  DateTime @default(now())
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+}
+
+model Goal {
+  id            String    @id @default(cuid())
+  userId        String
+  distanceKm    Float
+  targetSeconds Int
+  createdAt     DateTime  @default(now())
+  achievedAt    DateTime?
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  role      String // "user" | "assistant"
+  content   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
