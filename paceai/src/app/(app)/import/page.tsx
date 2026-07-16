@@ -38,9 +38,9 @@ export default function ImportPage() {
           ))}
         </div>
         <p className="mt-3 text-xs leading-relaxed text-ink-3">
-          Las integraciones OAuth (Strava, Garmin…) están definidas en el esquema de datos (modelo{" "}
-          <code className="rounded bg-hover px-1 py-0.5">Connection</code>) y se activarán con las credenciales de cada
-          plataforma. Mientras tanto, exporta tus actividades como GPX/TCX — todas las plataformas lo permiten.
+          Las integraciones OAuth (Strava, Garmin…) se activarán con las credenciales de cada plataforma.
+          Mientras tanto, exporta tus actividades como GPX/TCX — todas las plataformas lo permiten — y súbelas
+          arriba: quedan guardadas permanentemente en tu cuenta.
         </p>
       </Card>
     </div>

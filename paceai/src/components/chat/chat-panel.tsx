@@ -16,8 +16,8 @@ const SUGGESTIONS = [
   "¿Estoy entrenando demasiado?",
 ];
 
-export function ChatPanel() {
-  const [turns, setTurns] = useState<Turn[]>([]);
+export function ChatPanel({ initialTurns = [] }: { initialTurns?: Turn[] }) {
+  const [turns, setTurns] = useState<Turn[]>(initialTurns);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -30,17 +30,18 @@ export function ChatPanel() {
 
   async function send(question: string) {
     if (!question.trim() || busy) return;
-    const history = turns;
     setTurns((t) => [...t, { role: "user", content: question }, { role: "assistant", content: "" }]);
     setInput("");
     setBusy(true);
     scrollToBottom();
 
     try {
+      // History lives server-side (chat_messages, per user): only the
+      // question travels.
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ question, history }),
+        body: JSON.stringify({ question }),
       });
       if (!res.ok || !res.body) {
         const err = await res.json().catch(() => null);

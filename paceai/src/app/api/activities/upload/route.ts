@@ -1,17 +1,34 @@
 import { NextRequest } from "next/server";
-import { addUploadedActivity } from "@/lib/data";
+import { insertActivity } from "@/lib/data";
+import { getUser } from "@/lib/supabase/server";
 import { parseGpx } from "@/lib/parsers/gpx";
 import { parseTcx } from "@/lib/parsers/tcx";
 import { parseFit } from "@/lib/parsers/fit";
+import type { Activity } from "@/lib/engine/types";
 
 const MAX_BYTES = 15 * 1024 * 1024;
 
+/** Server-side sanity checks on parsed activities before persisting. */
+function validateActivity(a: Activity): string | null {
+  if (!(a.distanceKm > 0 && a.distanceKm < 1000)) return "Distancia fuera de rango.";
+  if (!(a.durationSec > 0 && a.durationSec < 48 * 3600)) return "Duración fuera de rango.";
+  if (!Number.isFinite(a.avgPaceSecKm) || a.avgPaceSecKm <= 0) return "Ritmo inválido.";
+  if (Number.isNaN(new Date(a.date).getTime())) return "Fecha inválida.";
+  if (!Array.isArray(a.splits) || a.splits.length > 1000) return "Parciales inválidos.";
+  return null;
+}
+
 /**
  * POST /api/activities/upload — multipart upload of GPX / TCX / FIT files.
- * Parses, classifies and stores the activity, then the analysis engine picks
- * it up on the next render.
+ * Requires an authenticated session; the activity is stored under the
+ * user's account (RLS enforces ownership).
  */
 export async function POST(req: NextRequest) {
+  const user = await getUser();
+  if (!user) {
+    return Response.json({ error: "Necesitas iniciar sesión para importar." }, { status: 401 });
+  }
+
   const form = await req.formData().catch(() => null);
   const file = form?.get("file");
   if (!(file instanceof File)) {
@@ -23,7 +40,7 @@ export async function POST(req: NextRequest) {
 
   const name = file.name.toLowerCase();
   try {
-    let activity;
+    let activity: Activity;
     if (name.endsWith(".gpx")) {
       activity = parseGpx(await file.text(), file.name);
     } else if (name.endsWith(".tcx")) {
@@ -36,8 +53,14 @@ export async function POST(req: NextRequest) {
         { status: 415 },
       );
     }
-    addUploadedActivity(activity);
-    return Response.json({ ok: true, activity: { id: activity.id, name: activity.name } });
+
+    const invalid = validateActivity(activity);
+    if (invalid) {
+      return Response.json({ error: `El archivo no supera la validación: ${invalid}` }, { status: 422 });
+    }
+
+    const { id } = await insertActivity(activity);
+    return Response.json({ ok: true, activity: { id, name: activity.name } });
   } catch (err) {
     const message = err instanceof Error ? err.message : "No se pudo procesar el archivo.";
     return Response.json({ error: message }, { status: 422 });

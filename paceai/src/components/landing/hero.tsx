@@ -42,16 +42,16 @@ export function Hero() {
       </motion.p>
       <motion.div variants={item} className="mt-8 flex flex-wrap items-center justify-center gap-3">
         <Link
-          href="/dashboard"
+          href="/register"
           className="rounded-lg bg-accent px-6 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90"
         >
           Analizar mis entrenamientos
         </Link>
         <Link
-          href="/chat"
+          href="/login"
           className="rounded-lg border border-line bg-elevated px-6 py-3 text-sm text-ink transition-colors hover:bg-hover"
         >
-          Hablar con el entrenador
+          Ya tengo cuenta
         </Link>
       </motion.div>
 

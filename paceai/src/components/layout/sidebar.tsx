@@ -13,7 +13,10 @@ import {
   MessageCircle,
   Trophy,
   Upload,
+  Settings,
+  LogOut,
 } from "lucide-react";
+import { signOutAction } from "@/lib/auth/actions";
 import { ThemeToggle } from "./theme-toggle";
 
 const NAV = [
@@ -27,9 +30,10 @@ const NAV = [
   { href: "/chat", label: "Entrenador IA", icon: MessageCircle },
   { href: "/achievements", label: "Logros", icon: Trophy },
   { href: "/import", label: "Importar", icon: Upload },
+  { href: "/settings", label: "Ajustes", icon: Settings },
 ];
 
-export function Sidebar() {
+export function Sidebar({ userEmail }: { userEmail: string }) {
   const pathname = usePathname();
   return (
     <aside className="sticky top-0 z-20 flex h-auto w-full shrink-0 flex-row items-center gap-1 overflow-x-auto border-b border-line bg-elevated/80 px-3 py-2 backdrop-blur-lg md:h-screen md:w-60 md:flex-col md:items-stretch md:overflow-visible md:border-b-0 md:border-r md:px-4 md:py-6">
@@ -64,8 +68,34 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="ml-auto md:mt-auto md:ml-0">
-        <ThemeToggle />
+      <div className="ml-auto flex items-center gap-1 md:mt-auto md:ml-0 md:flex-col md:items-stretch md:gap-2">
+        <div className="hidden items-center justify-between gap-2 rounded-lg border border-line bg-card px-3 py-2 md:flex">
+          <span className="truncate text-xs text-ink-2" title={userEmail}>
+            {userEmail}
+          </span>
+          <form action={signOutAction}>
+            <button
+              type="submit"
+              aria-label="Cerrar sesión"
+              title="Cerrar sesión"
+              className="grid h-7 w-7 place-items-center rounded-md text-ink-3 transition-colors hover:bg-hover hover:text-critical"
+            >
+              <LogOut size={14} />
+            </button>
+          </form>
+        </div>
+        <div className="flex items-center gap-1 md:justify-between">
+          <ThemeToggle />
+          <form action={signOutAction} className="md:hidden">
+            <button
+              type="submit"
+              aria-label="Cerrar sesión"
+              className="grid h-8 w-8 place-items-center rounded-lg text-ink-3 transition-colors hover:bg-hover hover:text-critical"
+            >
+              <LogOut size={15} />
+            </button>
+          </form>
+        </div>
       </div>
     </aside>
   );

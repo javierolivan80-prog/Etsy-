@@ -3,6 +3,7 @@ import { getAnalysis } from "@/lib/data";
 import { analyzeGoal } from "@/lib/engine";
 import { formatDuration, formatMonthYear, formatPace } from "@/lib/format";
 import { Card, Stat } from "@/components/ui/card";
+import { SaveGoal } from "@/components/goals/save-goal";
 
 export const metadata: Metadata = { title: "Objetivos" };
 
@@ -73,6 +74,9 @@ export default async function GoalsPage(props: {
             Analizar objetivo
           </button>
         </form>
+        <div className="mt-3 border-t border-line pt-3">
+          <SaveGoal distanceKm={distanceKm} targetSeconds={targetSeconds} />
+        </div>
       </Card>
 
       <div className="fade-up grid grid-cols-1 gap-4 sm:grid-cols-3">

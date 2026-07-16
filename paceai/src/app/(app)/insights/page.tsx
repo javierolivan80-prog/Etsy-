@@ -3,6 +3,7 @@ import { AlertTriangle, Lightbulb, Sparkles, TrendingUp } from "lucide-react";
 import { getAnalysis } from "@/lib/data";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const metadata: Metadata = { title: "Insights" };
 
@@ -14,8 +15,19 @@ const KIND_META = {
 };
 
 export default async function InsightsPage() {
-  const { analysis } = await getAnalysis();
+  const { activities, analysis } = await getAnalysis();
   const { insights, errors, monthly } = analysis;
+
+  if (activities.length === 0) {
+    return (
+      <div className="space-y-4">
+        <header className="fade-up">
+          <h1 className="text-xl font-semibold tracking-tight">Insights</h1>
+        </header>
+        <EmptyState text="Los insights se extraen de tus patrones de entrenamiento. Importa tus sesiones y el motor empezará a encontrar lo que no se ve en los gráficos." />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -2,7 +2,7 @@
  * Domain types for the PaceAI analysis engine.
  *
  * Every module in `src/lib/engine` is a pure function over these types so the
- * engine can run identically against demo data, database rows or freshly
+ * engine can run identically against database rows or freshly
  * parsed GPX/TCX/FIT files — and later against cycling/swimming activities
  * (see `sport`).
  */
@@ -46,7 +46,7 @@ export interface Activity {
   powerW?: number;
   calories?: number;
   splits: Split[];
-  source: "demo" | "gpx" | "tcx" | "fit" | "strava" | "garmin" | "manual";
+  source: "gpx" | "tcx" | "fit" | "strava" | "garmin" | "manual";
 }
 
 export interface AthleteProfile {

@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AlertTriangle, ArrowRight, BatteryCharging, Flame, HeartPulse, Sparkles } from "lucide-react";
-import { getAnalysis } from "@/lib/data";
+import { getAnalysis, getCurrentGoal } from "@/lib/data";
 import { analyzeGoal } from "@/lib/engine";
 import { formatDuration, formatKm, formatMonthYear, formatPace, RISK_LABELS, WORKOUT_LABELS } from "@/lib/format";
 import { Card, Stat } from "@/components/ui/card";
 import { Badge, WORKOUT_TONES } from "@/components/ui/badge";
 import { ScoreRing } from "@/components/ui/score-ring";
+import { EmptyState } from "@/components/ui/empty-state";
 import { FitnessChart } from "@/components/charts/fitness-chart";
 import { VolumeChart } from "@/components/charts/volume-chart";
 
@@ -15,12 +16,38 @@ export const metadata: Metadata = { title: "Dashboard" };
 const FATIGUE_LABEL = (recovery: number) =>
   recovery >= 70 ? "Baja" : recovery >= 45 ? "Media" : "Alta";
 
+const GOAL_LABELS: [number, string][] = [
+  [5, "5K"],
+  [10, "10K"],
+  [21.0975, "Media maratón"],
+  [42.195, "Maratón"],
+];
+
 export default async function DashboardPage() {
-  const { activities, analysis } = await getAnalysis();
+  const [{ activities, analysis }, savedGoal] = await Promise.all([
+    getAnalysis(),
+    getCurrentGoal(),
+  ]);
   const { scores, predictions, injuryRisk, monthly, errors, insights, weekly, load } = analysis;
 
-  // Sample goal until the user defines one: 10K in 45:00.
-  const goal = analyzeGoal(activities, 10, 45 * 60);
+  if (activities.length === 0) {
+    return (
+      <div className="space-y-4">
+        <header className="fade-up">
+          <h1 className="text-xl font-semibold tracking-tight">Estado de forma</h1>
+          <p className="mt-1 text-sm text-ink-2">Tu cuenta está lista. Solo falta una cosa: datos.</p>
+        </header>
+        <EmptyState />
+      </div>
+    );
+  }
+
+  // User-defined goal, or a 10K/45:00 placeholder inviting them to set one.
+  const goalDistance = savedGoal ? Number(savedGoal.distance_km) : 10;
+  const goalTarget = savedGoal ? savedGoal.target_seconds : 45 * 60;
+  const goalLabel =
+    GOAL_LABELS.find(([km]) => Math.abs(km - goalDistance) < 0.01)?.[1] ?? `${goalDistance} km`;
+  const goal = analyzeGoal(activities, goalDistance, goalTarget);
   const recent = [...activities].reverse().slice(0, 5);
   const topError = errors[0];
   const topInsight = insights[0];
@@ -57,9 +84,13 @@ export default async function DashboardPage() {
         </Card>
         <Card className="flex items-center justify-between">
           <Stat
-            label="Objetivo · 10K en 45:00"
+            label={`Objetivo · ${goalLabel} en ${formatDuration(goalTarget)}${savedGoal ? "" : " (ejemplo)"}`}
             value={`${goal.probabilityPct}%`}
-            sub={`Fecha estimada: ${formatMonthYear(goal.estimatedDate)}`}
+            sub={
+              savedGoal
+                ? `Fecha estimada: ${formatMonthYear(goal.estimatedDate)}`
+                : "Define el tuyo en Objetivos"
+            }
           />
         </Card>
       </div>

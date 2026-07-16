@@ -49,10 +49,10 @@ export default function LandingPage() {
             Entrar
           </Link>
           <Link
-            href="/dashboard"
+            href="/register"
             className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
           >
-            Probar la demo
+            Crear cuenta gratis
           </Link>
         </nav>
       </header>
@@ -79,10 +79,10 @@ export default function LandingPage() {
             <span className="text-ink-2">Es un entrenador que analiza absolutamente todo.</span>
           </h2>
           <Link
-            href="/dashboard"
+            href="/register"
             className="group inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
           >
-            Ver mi análisis
+            Empezar gratis
             <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>

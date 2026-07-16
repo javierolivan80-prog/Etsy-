@@ -5,6 +5,7 @@ import { analyzePacing } from "@/lib/engine";
 import { formatDuration, formatKm, formatPace, WORKOUT_LABELS } from "@/lib/format";
 import { Badge, WORKOUT_TONES } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const metadata: Metadata = { title: "Actividades" };
 
@@ -18,6 +19,17 @@ const STRATEGY_LABEL: Record<string, { label: string; tone: "good" | "neutral" |
 export default async function ActivitiesPage() {
   const { activities } = await getAnalysis();
   const sorted = [...activities].reverse();
+
+  if (sorted.length === 0) {
+    return (
+      <div className="space-y-4">
+        <header className="fade-up">
+          <h1 className="text-xl font-semibold tracking-tight">Actividades</h1>
+        </header>
+        <EmptyState />
+      </div>
+    );
+  }
 
   // Group by month for scannability.
   const groups = new Map<string, typeof sorted>();

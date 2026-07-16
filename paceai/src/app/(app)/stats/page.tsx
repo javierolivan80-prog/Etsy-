@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getAnalysis } from "@/lib/data";
 import { formatDuration, formatKm, formatPace } from "@/lib/format";
 import { Card, Stat } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { VolumeChart } from "@/components/charts/volume-chart";
 import { PaceTrendChart, type PacePoint } from "@/components/charts/pace-trend-chart";
 import { ZonesChart, type ZoneDatum } from "@/components/charts/zones-chart";
@@ -11,6 +12,17 @@ export const metadata: Metadata = { title: "Estadísticas" };
 export default async function StatsPage() {
   const { activities, profile, analysis } = await getAnalysis();
   const { weekly, monthly } = analysis;
+
+  if (activities.length === 0) {
+    return (
+      <div className="space-y-4">
+        <header className="fade-up">
+          <h1 className="text-xl font-semibold tracking-tight">Estadísticas</h1>
+        </header>
+        <EmptyState />
+      </div>
+    );
+  }
 
   const totalKm = activities.reduce((s, a) => s + a.distanceKm, 0);
   const totalSec = activities.reduce((s, a) => s + a.durationSec, 0);
