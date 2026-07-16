@@ -60,7 +60,6 @@ export function UploadPanel() {
         <input
           ref={inputRef}
           type="file"
-          accept=".gpx,.tcx,.fit,application/gpx+xml,text/xml,application/xml,application/octet-stream"
           disabled={busy}
           className="hidden"
           onChange={(e) => {
