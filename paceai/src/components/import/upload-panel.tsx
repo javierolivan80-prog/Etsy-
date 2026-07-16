@@ -30,23 +30,12 @@ export function UploadPanel() {
     }
   }
 
-  const handleClick = () => {
-    if (!busy && inputRef.current) {
-      inputRef.current.click();
-    }
-  };
-
   return (
     <div>
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={handleClick}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            handleClick();
-          }
-        }}
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => inputRef.current?.click()}
         onDragOver={(e) => {
           e.preventDefault();
           setDragging(true);
@@ -58,9 +47,9 @@ export function UploadPanel() {
           const file = e.dataTransfer.files?.[0];
           if (file) upload(file);
         }}
-        className={`flex w-full flex-col items-center gap-3 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors cursor-pointer ${
+        className={`flex w-full flex-col items-center gap-3 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors ${
           dragging ? "border-[var(--accent)] bg-[var(--accent-soft)]" : "border-line hover:border-[var(--border-strong)]"
-        } ${busy ? "opacity-50 cursor-not-allowed" : ""}`}
+        }`}
       >
         {busy ? (
           <Loader2 size={26} className="animate-spin text-accent" />
@@ -69,13 +58,12 @@ export function UploadPanel() {
         )}
         <div>
           <p className="text-sm font-medium">{busy ? "Analizando…" : "Arrastra tu archivo aquí o haz clic"}</p>
-          <p className="mt-1 text-xs text-ink-3">GPX · TCX · FIT · foto de tu entrenamiento — máx. 15 MB</p>
+          <p className="mt-1 text-xs text-ink-3">GPX · TCX · FIT · foto — máx. 15 MB</p>
         </div>
-      </div>
+      </button>
       <input
         ref={inputRef}
         type="file"
-        disabled={busy}
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];
