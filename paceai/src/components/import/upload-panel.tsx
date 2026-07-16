@@ -32,10 +32,7 @@ export function UploadPanel() {
 
   return (
     <div>
-      <button
-        type="button"
-        disabled={busy}
-        onClick={() => inputRef.current?.click()}
+      <label
         onDragOver={(e) => {
           e.preventDefault();
           setDragging(true);
@@ -47,9 +44,9 @@ export function UploadPanel() {
           const file = e.dataTransfer.files?.[0];
           if (file) upload(file);
         }}
-        className={`flex w-full flex-col items-center gap-3 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors ${
+        className={`flex w-full flex-col items-center gap-3 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors cursor-pointer ${
           dragging ? "border-[var(--accent)] bg-[var(--accent-soft)]" : "border-line hover:border-[var(--border-strong)]"
-        }`}
+        } ${busy ? "opacity-50 cursor-not-allowed" : ""}`}
       >
         {busy ? (
           <Loader2 size={26} className="animate-spin text-accent" />
@@ -60,18 +57,19 @@ export function UploadPanel() {
           <p className="text-sm font-medium">{busy ? "Analizando…" : "Arrastra tu archivo aquí o haz clic"}</p>
           <p className="mt-1 text-xs text-ink-3">GPX · TCX · FIT — máx. 15 MB</p>
         </div>
-      </button>
-      <input
-        ref={inputRef}
-        type="file"
-        accept=".gpx,.tcx,.fit,application/gpx+xml,text/xml,application/xml,application/octet-stream"
-        className="hidden"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) upload(file);
-          e.target.value = "";
-        }}
-      />
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".gpx,.tcx,.fit,application/gpx+xml,text/xml,application/xml,application/octet-stream"
+          disabled={busy}
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) upload(file);
+            e.target.value = "";
+          }}
+        />
+      </label>
       {message && (
         <p className={`mt-3 text-sm ${message.ok ? "text-good" : "text-critical"}`}>{message.text}</p>
       )}
