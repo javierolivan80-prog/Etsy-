@@ -30,9 +30,23 @@ export function UploadPanel() {
     }
   }
 
+  const handleClick = () => {
+    if (!busy && inputRef.current) {
+      inputRef.current.click();
+    }
+  };
+
   return (
     <div>
-      <label
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={handleClick}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            handleClick();
+          }
+        }}
         onDragOver={(e) => {
           e.preventDefault();
           setDragging(true);
@@ -57,18 +71,18 @@ export function UploadPanel() {
           <p className="text-sm font-medium">{busy ? "Analizando…" : "Arrastra tu archivo aquí o haz clic"}</p>
           <p className="mt-1 text-xs text-ink-3">GPX · TCX · FIT · foto de tu entrenamiento — máx. 15 MB</p>
         </div>
-        <input
-          ref={inputRef}
-          type="file"
-          disabled={busy}
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) upload(file);
-            e.target.value = "";
-          }}
-        />
-      </label>
+      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        disabled={busy}
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) upload(file);
+          e.target.value = "";
+        }}
+      />
       {message && (
         <p className={`mt-3 text-sm ${message.ok ? "text-good" : "text-critical"}`}>{message.text}</p>
       )}
