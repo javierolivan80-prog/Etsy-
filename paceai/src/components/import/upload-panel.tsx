@@ -32,10 +32,8 @@ export function UploadPanel() {
 
   return (
     <div>
-      <button
-        type="button"
-        disabled={busy}
-        onClick={() => inputRef.current?.click()}
+      <label
+        htmlFor="file-upload"
         onDragOver={(e) => {
           e.preventDefault();
           setDragging(true);
@@ -47,9 +45,9 @@ export function UploadPanel() {
           const file = e.dataTransfer.files?.[0];
           if (file) upload(file);
         }}
-        className={`flex w-full flex-col items-center gap-3 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors ${
+        className={`flex w-full cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors ${
           dragging ? "border-[var(--accent)] bg-[var(--accent-soft)]" : "border-line hover:border-[var(--border-strong)]"
-        }`}
+        } ${busy ? "opacity-50 cursor-not-allowed" : ""}`}
       >
         {busy ? (
           <Loader2 size={26} className="animate-spin text-accent" />
@@ -60,10 +58,12 @@ export function UploadPanel() {
           <p className="text-sm font-medium">{busy ? "Analizando…" : "Arrastra tu archivo aquí o haz clic"}</p>
           <p className="mt-1 text-xs text-ink-3">GPX · TCX · FIT · foto — máx. 15 MB</p>
         </div>
-      </button>
+      </label>
       <input
+        id="file-upload"
         ref={inputRef}
         type="file"
+        disabled={busy}
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];
