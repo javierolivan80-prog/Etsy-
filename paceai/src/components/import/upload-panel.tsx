@@ -55,7 +55,7 @@ export function UploadPanel() {
         )}
         <div>
           <p className="text-sm font-medium">{busy ? "Analizando…" : "Arrastra tu archivo aquí o haz clic"}</p>
-          <p className="mt-1 text-xs text-ink-3">GPX · TCX · FIT — máx. 15 MB</p>
+          <p className="mt-1 text-xs text-ink-3">GPX · TCX · FIT · foto de tu entrenamiento — máx. 15 MB</p>
         </div>
         <input
           ref={inputRef}

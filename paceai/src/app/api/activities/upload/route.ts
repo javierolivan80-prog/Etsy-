@@ -4,9 +4,28 @@ import { getUser } from "@/lib/supabase/server";
 import { parseGpx } from "@/lib/parsers/gpx";
 import { parseTcx } from "@/lib/parsers/tcx";
 import { parseFit } from "@/lib/parsers/fit";
+import { buildActivityFromPhoto } from "@/lib/parsers/photo";
+import { extractActivityFromImage, isSupportedImage } from "@/lib/ai/vision";
 import type { Activity } from "@/lib/engine/types";
 
 const MAX_BYTES = 15 * 1024 * 1024;
+
+/** Read a workout screenshot with AI vision and turn it into an Activity. */
+async function parseImage(file: File): Promise<Activity> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error(
+      "La lectura de fotos necesita una clave de IA. Añade ANTHROPIC_API_KEY en tu archivo .env.local (o sube un archivo GPX/TCX/FIT).",
+    );
+  }
+  if (!isSupportedImage(file.type)) {
+    throw new Error(
+      "Formato de imagen no soportado. Usa una captura JPG, PNG o WEBP (las capturas del iPhone valen).",
+    );
+  }
+  const base64 = Buffer.from(await file.arrayBuffer()).toString("base64");
+  const extracted = await extractActivityFromImage(base64, file.type);
+  return buildActivityFromPhoto(extracted);
+}
 
 /** Server-side sanity checks on parsed activities before persisting. */
 function validateActivity(a: Activity): string | null {
@@ -47,9 +66,11 @@ export async function POST(req: NextRequest) {
       activity = parseTcx(await file.text(), file.name);
     } else if (name.endsWith(".fit")) {
       activity = parseFit(await file.arrayBuffer(), file.name);
+    } else if (file.type.startsWith("image/")) {
+      activity = await parseImage(file);
     } else {
       return Response.json(
-        { error: "Formato no soportado. Sube un archivo GPX, TCX o FIT." },
+        { error: "Formato no soportado. Sube un archivo GPX, TCX, FIT o una foto de tu entrenamiento." },
         { status: 415 },
       );
     }

@@ -24,8 +24,14 @@ export default function ImportPage() {
         </p>
       </header>
 
-      <Card className="fade-up" title="Subir archivo" subtitle="GPX y TCX se analizan al instante; FIT llegará en breve">
+      <Card className="fade-up" title="Subir archivo" subtitle="GPX, TCX y FIT se analizan al instante; una foto de tu entrenamiento la lee la IA">
         <UploadPanel />
+        <p className="mt-3 text-xs leading-relaxed text-ink-3">
+          ¿Solo tienes una captura de Strava, Garmin o tu reloj? Súbela y la IA extrae distancia, tiempo,
+          ritmo y pulsaciones. Recuerda: una foto no contiene tu GPS, así que el análisis de una imagen es
+          más básico que el de un archivo GPX/TCX/FIT. La lectura de fotos requiere configurar una clave de IA
+          (<code>ANTHROPIC_API_KEY</code>).
+        </p>
       </Card>
 
       <Card className="fade-up" title="Conectar plataformas" subtitle="Sincronización automática con tu reloj o app">

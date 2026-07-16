@@ -46,7 +46,7 @@ export interface Activity {
   powerW?: number;
   calories?: number;
   splits: Split[];
-  source: "gpx" | "tcx" | "fit" | "strava" | "garmin" | "manual";
+  source: "gpx" | "tcx" | "fit" | "strava" | "garmin" | "manual" | "photo";
 }
 
 export interface AthleteProfile {
